@@ -15,6 +15,6 @@ pipeline {
     }
   }
   environment {
-    hello = ''
+    MY_NAME = 'Mikee'
   }
 }
