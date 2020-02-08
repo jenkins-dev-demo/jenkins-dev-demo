@@ -1,21 +1,31 @@
-pipeline {
-  agent any
-  stages {
-    stage('Setup') {
-      steps {
-        sh '''#!/bin/bash
-                    
-                    set +x
-                    echo "THIS IS A TEST FOR THE JENKINS PIPELINE"
-                    set -x
-                '''
-      }
-    }
+node {
+ 	// Clean workspace before doing anything
+    deleteDir()
 
-  }
-  environment {
-    ENGINE = 'fot'
-    VERSION = '1.0.2'
-    RPM_FILE = ''
-  }
+    try {
+        stage ('Clone') {
+        	checkout scm
+        }
+        stage ('Build') {
+        	sh "echo 'shell scripts to build project...'"
+        }
+        stage ('Tests') {
+	        parallel 'static': {
+	            sh "echo 'shell scripts to run static tests...'"
+	        },
+	        'unit': {
+	            sh "echo 'shell scripts to run unit tests...'"
+	        },
+	        'integration': {
+	            sh "echo 'shell scripts to run integration tests...'"
+	        }
+        }
+      	stage ('Deploy') {
+            sh "echo 'shell scripts to deploy to server...'"
+      	}
+    } catch (err) {
+        currentBuild.result = 'FAILED'
+        throw err
+    }
 }
+
